@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 `define EMPTY_PTR 8'hFF
+`include "linked_list.v"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -27,73 +28,54 @@ module orderbook #(
     input clk,
     input reset,
     
-    input [WIDTH - 1:0] price_in,
-    input [WIDTH - 1:0] quantity_in,
-    input [15:0] order_id_in,
-    input side_in,                    // 0 = BID, 1 = ASK
+    input [WIDTH - 1:0] price,
+    input [WIDTH - 1:0] quantity,
+    input [15:0] order_id,
+    input side,                    // 0 = BID, 1 = ASK
     input [WIDTH - 1:0] time_entered,
     
     output reg [WIDTH - 1:0] best_ask,
     output reg [WIDTH - 1:0] best_bid
     );
     
-    // Node arrays for linked list DA with 256 price levels
-    reg [31:0] order_id [0:255];
-    reg [15:0] order_quantity [0:255];
-    reg [7:0]  order_next [0:255];   // Next pointer (linked list)
-    reg [7:0]  order_head [0:255];   // Hash table: price → head node
-    reg [7:0]  free_ptr;             // Points to next free node index
+    wire [7:0] list_head_in;
+    wire [7:0] list_head_out;
+    wire [7:0] new_node_idx;
+    // head of LL -> order entered in first or high priority at each PL
+    reg [7:0] bid_head [0:255]; // bid LL head pointers
+    reg [7:0] ask_head [0:255]; // ask LL head pointers
     
-    reg [7:0] price_index;
-    reg [7:0] node_ptr;
-    reg [7:0] curr_ptr;
+    assign list_head_in = (side == 1'b0) ? bid_head[price] : ask_head[price];
+    
+//    parameter idle = 8'h00;
+//    parameter add_en = 8'h01;
+//    parameter cancel_en = 8'h02;
+//    parameter update_en = 8'h03;
 
-    parameter idle = 8'h00;
-    parameter add_en = 8'h01;
-    parameter cancel_en = 8'h02;
-    parameter update_en = 8'h03;
+    linked_list #(.N(256)) order_list(
+        .clk(clk),
+        .reset(reset),
+        .insert_en(insert_en),
+        .order_id_in(order_id),
+        .qunantity_in(quantity),
+        .ll_head_in(list_head_in),
+        .ll_head_out(list_head_out),
+        .new_node_idx(new_node_idx)
+    );
     
-    reg [7:0] state = idle;
-    
-//    reg valid_bid [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] bid_order_id [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] bid_quantity [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] bid_time [0:255][0:DEPTH-1];
-
-//    reg valid_ask [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] ask_order_id [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] ask_quantity [0:255][0:DEPTH-1];
-//    reg [WIDTH-1:0] ask_time [0:255][0:DEPTH-1];
+    //reg [7:0] state = idle;
     
     integer i, j;
     
     always @(posedge clk) begin
-        if (reset) begin
-            for (i = 0; i < PRICE_LVL; i = i + 1) begin
-                 order_head[i] <= `EMPTY_PTR;
-            end
-            state <= idle;
-            free_ptr <= 0;
-        end else if (state == add_en) begin            
-            price_index = price_in % 256;
-            node_ptr    = free_ptr;
-            free_ptr    = free_ptr + 1;
-            
-            order_id[node_ptr] <= order_id_in;
-            order_quantity[node_ptr] <= quantity_in;
-            order_next[node_ptr] <= `EMPTY_PTR;
-            
-            if (order_head[price_index] == `EMPTY_PTR) begin
-                order_head[price_index] <= node_ptr;
-            end else begin
-                curr_ptr = order_head[price_index];
-                while (order_next[curr_ptr] != `EMPTY_PTR) begin
-                    curr_ptr = order_next[curr_ptr];
-                end
-                order_next[curr_ptr] <= node_ptr;
-            end
+        if (insert_en) begin
+            if (side == 1'b0)
+                bid_head[price] <= list_head_out;
+            else
+                ask_head[price] <= list_head_out;
         end
     end
+    
 //    always @(posedge clk or posedge reset) begin
 //        best_ask <= 0;
 //        best_bid <= 0;

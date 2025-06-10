@@ -76,7 +76,7 @@ read_verilog -library xil_defaultlib {
   C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.srcs/sources_1/new/orderbook_update.v
   C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.srcs/sources_1/new/order.v
   C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.srcs/sources_1/new/bats_parser.v
-  C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.srcs/sources_1/new/hash_table.v
+  C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.srcs/sources_1/new/linked_list.v
 }
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
