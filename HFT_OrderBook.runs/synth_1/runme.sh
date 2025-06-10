@@ -25,7 +25,7 @@ else
 fi
 export LD_LIBRARY_PATH
 
-HD_PWD='C:/Users/Kat/vivado_projects/HFT_OrderBook/HFT_OrderBook.runs/synth_1'
+HD_PWD='C:/Users/Kat/vivado_projects/FPGA-Order-Book/HFT_OrderBook.runs/synth_1'
 cd "$HD_PWD"
 
 HD_LOG=runme.log
@@ -41,4 +41,4 @@ EAStep()
      fi
 }
 
-EAStep vivado -log orderbook.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source orderbook.tcl
+EAStep vivado -log list.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source list.tcl

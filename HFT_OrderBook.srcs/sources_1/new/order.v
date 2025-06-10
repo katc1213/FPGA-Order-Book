@@ -30,7 +30,7 @@ module order(
     input [31:0] best_bid,
     
     // order_id, 
-    output match
+    output reg match
     );
         
     always @(*) begin

@@ -40,6 +40,9 @@ module bats_parser(
     output reg parse_done
     );
     
+    parameter IDLE = 3'b000;
+    reg [2:0] state;
+    
 //    typedef enum {
 //        IDLE,
 //        OPCODE,
@@ -61,11 +64,12 @@ module bats_parser(
             parse_valid <= 0;
 //            buf_idx <= 0;
 //            field_index <= 0;
-        end else begin
-            state <= next_state;
-            if (data_valid && state != DONE) begin
-            end
-            end
+        end 
+//        else begin
+//            state <= next_state;
+//            if (data_valid && state != DONE) begin
+//            end
+//            end
     end
     
 endmodule
