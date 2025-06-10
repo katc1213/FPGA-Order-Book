@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`define EMPTY_PTR 8'hFF
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -27,9 +28,9 @@ module orderbook #(
     input reset,
     input [7:0] state,
     
-    input [WIDTH - 1:0] price,
-    input [WIDTH - 1:0] quantity,
-    input [15:0] order_id,
+    input [WIDTH - 1:0] price_in,
+    input [WIDTH - 1:0] quantity_in,
+    input [15:0] order_id_in,
     input side,         // 0 = BID, 1 = ASK
     input [WIDTH - 1:0] time_entered,
     
@@ -40,6 +41,14 @@ module orderbook #(
     output reg [WIDTH - 1:0] best_ask,
     output reg [WIDTH - 1:0] best_bid
     );
+    
+    // Node arrays for linked list DA with 256 price levels
+    reg [31:0] order_id [0:255];
+    reg [15:0] order_quantity [0:255];
+    reg [7:0]  order_next [0:255];   // Next pointer (linked list)
+    reg [7:0]  order_head [0:255];   // Hash table: price → head node
+    reg [7:0]  free_ptr;             // Points to next free node index
+
     
     reg valid_bid [0:255][0:DEPTH-1];
     reg [WIDTH-1:0] bid_order_id [0:255][0:DEPTH-1];
